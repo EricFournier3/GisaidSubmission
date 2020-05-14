@@ -35,7 +35,7 @@ def MakeSeqIdList():
 
             desc_dict = {}
             desc_dict['gisaid_id'] = rec.id
-            desc_dict['seq_method'] = str(rec.description).split(' ')[1]
+            desc_dict['method'] = re.split('\s+',rec.description)[1]
             
             gisaid_info[sgil_id] = desc_dict
 
