@@ -55,52 +55,54 @@ MakeSeqIdList()
 
 #print(str(gisaid_info))
 
-in_metadata = os.path.join(base_dir,"20200508_SelectionPatients.txt")
+#in_metadata = os.path.join(base_dir,"20200508_SelectionPatients.txt")
+in_metadata = os.path.join(base_dir,"sgil_extract.tsv")
 
-df_in = pd.read_csv(in_metadata,delimiter="\t",index_col=False,encoding="ISO-8859-1")
-sub_df_in = df_in[df_in['sample'].isin(sgil_id_list)]
-sub_df_in["ID_GISAID"] = "Canada/Qc-" + sub_df_in["sample"] + "/2020"
-sub_df_in["LOCATION_GISAID"] = "North-America / Canada / Quebec / " + sub_df_in[" RSS_PATIENT"]
-sub_df_in["TRAVEL_GISAID"] = sub_df_in[" VOYAGE_PAYS_1"]
+df_in = pd.read_csv(in_metadata,delimiter="\t",index_col=False,encoding="UTF-8")
+#df_in = pd.read_csv(in_metadata,delimiter="\t",index_col=False,encoding="iso-8859-1")
 
-gisaid_metadata = sub_df_in.loc[:,('sample','ID_GISAID',' DATE_PRELEVEMENT',' AGE_ANNEE',' SEXE','LOCATION_GISAID','TRAVEL_GISAID',' RESULTAT_LABORATOIRE',' CH',)]
 
-#print(gisaid_metadata)
+#sub_df_in = df_in[df_in['sample'].isin(sgil_id_list)]
+sub_df_in = df_in[df_in['NO_LSPQ'].isin(sgil_id_list)]
 
-gisaid_metadata.columns = ['sample name temp','Virus name temp','Collection date temp','Patient age temp','Gender temp','Location temp','Additional location information temp','Additional host information temp','Originating lab temp']
+#sub_df_in["ID_GISAID"] = "Canada/Qc-" + sub_df_in["sample"] + "/2020"
+#sub_df_in["ID_GISAID"] = "Canada/Qc-" + sub_df_in["NO_LSPQ"] + "/2020"
 
-def test(i):
-    #seq_method:MGI|assemb_method:mymethod|snv_call_method:mymethod 
-    #print(str(i) + " eric")
-    l = []
-    for j in i:
-         #print(">>> ", j)
-         #print(str(gisaid_info[j]['method']))
+sub_df_in.insert(loc=0,column='ID_GISAID',value= "Canada/Qc-" + sub_df_in['NO_LSPQ'] + "/2020" ,allow_duplicates=False ) 
+
+#sub_df_in["LOCATION_GISAID"] = "North-America / Canada / Quebec / " + sub_df_in[" RSS_PATIENT"]
+#sub_df_in["LOCATION_GISAID"] = "North-America / Canada / Quebec / " + sub_df_in["RSS_PATIENT"]
+sub_df_in.insert(loc=1,column='LOCATION_GISAID',value= "North-America / Canada / " + sub_df_in['RSS_PATIENT'] ,allow_duplicates=False ) 
+
+#sub_df_in["TRAVEL_GISAID"] = sub_df_in[" VOYAGE_PAYS_1"]
+#sub_df_in["TRAVEL_GISAID"] = sub_df_in["VOYAGE_PAYS_1"]
+sub_df_in.insert(loc=2,column='TRAVEL_GISAID',value= sub_df_in['VOYAGE_PAYS_1'] ,allow_duplicates=False ) 
+
+#print(sub_df_in)
+
+#gisaid_metadata = sub_df_in.loc[:,('sample','ID_GISAID',' DATE_PRELEVEMENT',' AGE_ANNEE',' SEXE','LOCATION_GISAID','TRAVEL_GISAID',' RESULTAT_LABORATOIRE',' CH',)]
+
+gisaid_metadata = sub_df_in.loc[:,('NO_LSPQ','ID_GISAID','DATE_PRELEV','AGE','SEX','LOCATION_GISAID','TRAVEL_GISAID','RES_LAB','CH','ADDR_CH')]
+
+gisaid_metadata.columns = ['NO_LSPQ temp','Virus name temp','Collection date temp','Patient age temp','Gender temp','Location temp','Additional location information temp','Additional host information temp','Originating lab temp','Originating lab address temp']
+
+
+def GetSequencingMethod(samples_id):
+    method_list = []
+    for sample in samples_id:
          try:
-             method = re.search(r'seq_method:(\S+)\|assemb_method:\S+\|snv_call_method:\S+',str(gisaid_info[j]['method'])).group(1)
+             method = re.search(r'seq_method:(\S+)\|assemb_method:\S+\|snv_call_method:\S+',str(gisaid_info[sample]['method'])).group(1)
          except:
              method = 'unknown'
          
-         l.append(method)
+         method_list.append(method)
+    
+    return(method_list)
 
-    #print(str(l))
-    '''
-    for  j in i:
-        try:
-            method = re.search(r'seq_method:(\S+)\|assemb_method:\S+\|snv_call_method:\S+',str(gisaid_info[j]['method'])).group(1)
-            print(i + " " + method)
-        except:
-            method = 'unknown'
 
-        l.append(method)
-    '''
-    return(pd.Series(l))
-
-#mys = test(gisaid_metadata['sample name temp'].values)
-
-#exit(0)
-
-gisaid_metadata.insert(loc=0,column='sample name',value=gisaid_metadata['sample name temp'],allow_duplicates=True)
+gisaid_metadata.insert(loc=0,column='NO_LSPQ',value=gisaid_metadata['NO_LSPQ temp'],allow_duplicates=True)
+#myt = test(gisaid_metadata['NO_LSPQ'].values)
+#print(str(myt))
 gisaid_metadata.insert(loc=1,column='Submitter',value="SandrineMoreiraLSPQ",allow_duplicates=True)
 gisaid_metadata.insert(loc=2,column='FASTA filename',value=os.path.basename(fasta_cat),allow_duplicates=True)
 gisaid_metadata.insert(loc=3,column='Virus name',value=gisaid_metadata['Virus name temp'],allow_duplicates=True)
@@ -118,11 +120,12 @@ gisaid_metadata.insert(loc=14,column='Specimen source',value=' ',allow_duplicate
 gisaid_metadata.insert(loc=15,column='Outbreak',value=' ',allow_duplicates=True)
 gisaid_metadata.insert(loc=16,column='Last vaccinated',value=' ',allow_duplicates=True)
 gisaid_metadata.insert(loc=17,column='Treatment',value=' ',allow_duplicates=True)
-gisaid_metadata.insert(loc=18,column='Sequencing technology',value= test(gisaid_metadata['sample name'].values),allow_duplicates=True)
+gisaid_metadata.insert(loc=18,column='Sequencing technology',value= GetSequencingMethod(gisaid_metadata['NO_LSPQ']),allow_duplicates=True)
+#gisaid_metadata.insert(loc=18,column='Sequencing technology',value= "jjjjj",allow_duplicates=True)
 gisaid_metadata.insert(loc=19,column='Assembly method',value=' ',allow_duplicates=True)
 gisaid_metadata.insert(loc=20,column='Coverage',value=' ',allow_duplicates=True)
 gisaid_metadata.insert(loc=21,column='Originating lab',value=gisaid_metadata['Originating lab temp'],allow_duplicates=True)
-gisaid_metadata.insert(loc=22,column='Originating lab address',value="a venir",allow_duplicates=True)
+gisaid_metadata.insert(loc=22,column='Originating lab address',value=gisaid_metadata['Originating lab address temp'],allow_duplicates=True)
 gisaid_metadata.insert(loc=23,column='Sample ID given by the sample provider',value=" ",allow_duplicates=True)
 gisaid_metadata.insert(loc=24,column='Submitting lab',value="Laboratoire de santé publique du Québec",allow_duplicates=True)
 gisaid_metadata.insert(loc=25,column='Submitting lab address',value="a venir",allow_duplicates=True)
@@ -130,9 +133,8 @@ gisaid_metadata.insert(loc=26,column='Sample ID given by the submitting laborato
 gisaid_metadata.insert(loc=27,column='Authors',value="a venir",allow_duplicates=True)
 
 
-#print(gisaid_metadata['sample name'].values)
-
-del gisaid_metadata['sample name temp']
+del gisaid_metadata['NO_LSPQ temp']
+#del gisaid_metadata['NO_LSPQ']
 del gisaid_metadata['Virus name temp']
 del gisaid_metadata['Collection date temp']
 del gisaid_metadata['Patient age temp']
@@ -141,6 +143,7 @@ del gisaid_metadata['Location temp']
 del gisaid_metadata['Additional location information temp']
 del gisaid_metadata['Additional host information temp']
 del gisaid_metadata['Originating lab temp']
-print(gisaid_metadata[['sample name','Sequencing technology']])
+del gisaid_metadata['Originating lab address temp']
+print(gisaid_metadata)
 
 
