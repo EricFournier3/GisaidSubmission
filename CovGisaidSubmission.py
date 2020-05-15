@@ -82,7 +82,8 @@ gisaid_metadata.insert(loc=4,column='covv_type',value='betacoronavirus',allow_du
 gisaid_metadata.insert(loc=5,column='covv_passage',value='Original',allow_duplicates=True)
 gisaid_metadata.insert(loc=6,column='covv_collection_date',value=gisaid_metadata['Collection date temp'],allow_duplicates=True)
 gisaid_metadata.insert(loc=7,column='covv_location',value=gisaid_metadata['Location temp'],allow_duplicates=True)
-gisaid_metadata.insert(loc=8,column='covv_add_location',value=gisaid_metadata['Additional location information temp'],allow_duplicates=True)
+#gisaid_metadata.insert(loc=8,column='covv_add_location',value=gisaid_metadata['Additional location information temp'],allow_duplicates=True)
+gisaid_metadata.insert(loc=8,column='covv_add_location',value=' ',allow_duplicates=True)
 gisaid_metadata.insert(loc=9,column='covv_host',value='Human',allow_duplicates=True)
 #gisaid_metadata.insert(loc=10,column='covv_add_host_info',value=gisaid_metadata['Additional host information temp'],allow_duplicates=True)
 gisaid_metadata.insert(loc=10,column='covv_add_host_info',value=' ',allow_duplicates=True)
@@ -97,12 +98,12 @@ gisaid_metadata.insert(loc=18,column='covv_seq_technology',value= GetSequencingM
 gisaid_metadata.insert(loc=19,column='covv_assembly_method',value=' ',allow_duplicates=True)
 gisaid_metadata.insert(loc=20,column='covv_coverage',value=' ',allow_duplicates=True)
 gisaid_metadata.insert(loc=21,column='covv_orig_lab',value=gisaid_metadata['Originating lab temp'],allow_duplicates=True)
-gisaid_metadata.insert(loc=22,column='covv_ori_lab_addr',value=gisaid_metadata['Originating lab address temp'],allow_duplicates=True)
+gisaid_metadata.insert(loc=22,column='covv_orig_lab_addr',value=gisaid_metadata['Originating lab address temp'],allow_duplicates=True)
 gisaid_metadata.insert(loc=23,column='covv_provider_sample_id',value=' ',allow_duplicates=True)
 gisaid_metadata.insert(loc=24,column='covv_subm_lab',value="Laboratoire de santé publique du Québec",allow_duplicates=True)
 gisaid_metadata.insert(loc=25,column='covv_subm_lab_addr',value=submitting_lab_addr,allow_duplicates=True)
-gisaid_metadata.insert(loc=26,column='cov_subm_sample_id',value=gisaid_metadata['NO_LSPQ temp'],allow_duplicates=True)
-gisaid_metadata.insert(loc=27,column='cov_authors',value=authors,allow_duplicates=True)
+gisaid_metadata.insert(loc=26,column='covv_subm_sample_id',value=gisaid_metadata['NO_LSPQ temp'],allow_duplicates=True)
+gisaid_metadata.insert(loc=27,column='covv_authors',value=authors,allow_duplicates=True)
 
 
 del gisaid_metadata['NO_LSPQ']
@@ -118,7 +119,7 @@ del gisaid_metadata['Originating lab temp']
 del gisaid_metadata['Originating lab address temp']
 #print(gisaid_metadata)
 
-added_header = {'submitter':'Submitter','fn':'FASTA filename','covv_virus_name':'Virus name','covv_type':'Type','covv_passage':'Passage details/history','covv_collection_date':'Collection date','covv_location':'Location','covv_add_location':'Additionnal location information','covv_host':'Host','covv_add_host_info':'Additional host info', 'covv_gender':'Gender','covv_patient_age':'Patient age','covv_patient_status':'Patient status','covv_specimen':'Specimen source','covv_outbreak':'Outbreak','covv_last_vaccinated':'Last vaccinated','covv_treatment':'Treatment','covv_seq_technology':'Sequencing technology','covv_assembly_method':'Assembly method','covv_coverage':'Coverage','covv_orig_lab':'Originating lab','covv_orig_lab_addr':'Address','covv_provider_sample_id':'Sample ID given bt the sample provider','covv_subm_lab':'Submitting lab','covv_subm_lab_addr':'Address','covv_subm_sample_id':'Sample ID given by the submitting laboratory','cov_authors':'Authors'}
+added_header = {'submitter':'Submitter','fn':'FASTA filename','covv_virus_name':'Virus name','covv_type':'Type','covv_passage':'Passage details/history','covv_collection_date':'Collection date','covv_location':'Location','covv_add_location':'Additionnal location information','covv_host':'Host','covv_add_host_info':'Additional host info', 'covv_gender':'Gender','covv_patient_age':'Patient age','covv_patient_status':'Patient status','covv_specimen':'Specimen source','covv_outbreak':'Outbreak','covv_last_vaccinated':'Last vaccinated','covv_treatment':'Treatment','covv_seq_technology':'Sequencing technology','covv_assembly_method':'Assembly method','covv_coverage':'Coverage','covv_orig_lab':'Originating lab','covv_orig_lab_addr':'Address','covv_provider_sample_id':'Sample ID given bt the sample provider','covv_subm_lab':'Submitting lab','covv_subm_lab_addr':'Address','covv_subm_sample_id':'Sample ID given by the submitting laboratory','covv_authors':'Authors'}
 
 gisaid_metadata.iloc[0] = added_header
 
