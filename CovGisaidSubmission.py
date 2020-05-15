@@ -11,8 +11,6 @@ Eric Fournier 2020-05-14
 
 """
 
-
-
 pd.set_option('display.max_columns', 50)
 
 global sgil_id_list
@@ -59,7 +57,7 @@ def GetSequencingMethod(samples_id):
     
     return(method_list)
 
-#ConcatSeq(base_dir + "L*.fasta",fasta_cat)
+ConcatSeq(base_dir + "L*.fasta",fasta_cat)
 
 MakeSeqIdList()
 
@@ -117,7 +115,6 @@ del gisaid_metadata['Additional location information temp']
 del gisaid_metadata['Additional host information temp']
 del gisaid_metadata['Originating lab temp']
 del gisaid_metadata['Originating lab address temp']
-#print(gisaid_metadata)
 
 added_header = {'submitter':'Submitter','fn':'FASTA filename','covv_virus_name':'Virus name','covv_type':'Type','covv_passage':'Passage details/history','covv_collection_date':'Collection date','covv_location':'Location','covv_add_location':'Additionnal location information','covv_host':'Host','covv_add_host_info':'Additional host info', 'covv_gender':'Gender','covv_patient_age':'Patient age','covv_patient_status':'Patient status','covv_specimen':'Specimen source','covv_outbreak':'Outbreak','covv_last_vaccinated':'Last vaccinated','covv_treatment':'Treatment','covv_seq_technology':'Sequencing technology','covv_assembly_method':'Assembly method','covv_coverage':'Coverage','covv_orig_lab':'Originating lab','covv_orig_lab_addr':'Address','covv_provider_sample_id':'Sample ID given bt the sample provider','covv_subm_lab':'Submitting lab','covv_subm_lab_addr':'Address','covv_subm_sample_id':'Sample ID given by the submitting laboratory','covv_authors':'Authors'}
 
