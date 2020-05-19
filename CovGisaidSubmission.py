@@ -3,12 +3,14 @@ import os
 from Bio import SeqIO
 from Bio.SeqRecord import SeqRecord
 import re
+import argparse
+from datetime import date
+import glob
+import shutil
 
 
 """
  Eric Fournier 2020-05-14
-
-
 """
 
 pd.set_option('display.max_columns', 50)
@@ -19,11 +21,34 @@ sgil_id_list = []
 global gisaid_info
 gisaid_info = {}
 
-base_dir = "/data/Runs/SARS-CoV-2/GenomeCenterSeq/FinalRelease/FinalSubmitted_20200514/"
-fasta_cat = os.path.join(base_dir,"all_sequences.fasta")
-metadata_out = os.path.join(base_dir,"20200514_ncov19_metadata.xls")
+today = date.today()
+today = today.strftime("%Y%m%d")
+
+parser = argparse.ArgumentParser(description='Create files for GISAID submission')
+parser.add_argument('--unpublished-path','-u', required=True, help="path to final unpublished sequence")
+parser.add_argument('--submitted-path','-s', required=True, help="path to final sumitted sequence")
+
+args = parser.parse_args()
+
+unpublished_path = os.path.join(args.unpublished_path)
+today_submitted_seq_path = os.path.join(args.submitted_path,today)
+metadata_name = today + "_ncov19_metadata.xls"
+
+lspq_miseq_dir = os.path.join("/mnt/Partage/LSPQ_Partage/DiagnosticMoleculaire/PROJETS/Covid19/SequencingPipeline/GISAID/TO_PUBLISH")
+
+try:
+    os.mkdir(today_submitted_seq_path)
+except:
+    print(today_submitted_seq_path + " already exist")
+
+fasta_cat = os.path.join(today_submitted_seq_path,"all_sequences.fasta")
+
+metadata_in = "/data/Applications/GitScript/Covid19_V2/NextStrainFiles/data/lspq/sgil_extract.tsv"
+metadata_out = os.path.join(today_submitted_seq_path,metadata_name)
+
 submitting_lab_addr = "20045, chemin Sainte-Marie, Sainte-Anne-de-Bellevue, QC, Canada"
 authors = "Sandrine Moreira, Ioannis Ragoussis, Guillaume Bourque, Jesse Shapiro, Mark Lathrop and Michel Roger on behalf of the CoVSeQ research group (http://covseq.ca/researchgroup)"
+
 
 def ConcatSeq(files_in,file_out):
     os.system("cat " + files_in + " > " + file_out )
@@ -57,12 +82,11 @@ def GetSequencingMethod(samples_id):
     
     return(method_list)
 
-ConcatSeq(base_dir + "L*.fasta",fasta_cat)
+ConcatSeq(unpublished_path + "L*.fasta",fasta_cat)
 
 MakeSeqIdList()
 
-in_metadata = os.path.join(base_dir,"sgil_extract.tsv")
-df_in = pd.read_csv(in_metadata,delimiter="\t",index_col=False,encoding="UTF-8")
+df_in = pd.read_csv(metadata_in,delimiter="\t",index_col=False,encoding="UTF-8")
 sub_df_in = df_in[df_in['NO_LSPQ'].isin(sgil_id_list)]
 sub_df_in.insert(loc=0,column='ID_GISAID',value= "Canada/Qc-" + sub_df_in['NO_LSPQ'] + "/2020" ,allow_duplicates=False ) 
 sub_df_in.insert(loc=1,column='LOCATION_GISAID',value= "North-America / Canada / " + sub_df_in['RSS_PATIENT'] ,allow_duplicates=False ) 
@@ -121,3 +145,11 @@ added_header = {'submitter':'Submitter','fn':'FASTA filename','covv_virus_name':
 gisaid_metadata.iloc[0] = added_header
 
 gisaid_metadata.to_excel(metadata_out,index=False,sheet_name='Submissions')
+
+fasta_in_list = glob.glob(unpublished_path + "*.fasta")
+
+for fasta in fasta_in_list:
+        shutil.move(fasta,today_submitted_seq_path)
+
+os.system("sudo cp -r " + today_submitted_seq_path + " " + lspq_miseq_dir)
+
