@@ -104,7 +104,8 @@ MakeSeqIdList()
 df_in = pd.read_csv(metadata_in,delimiter="\t",index_col=False,encoding="UTF-8")
 sub_df_in = df_in[df_in['NO_LSPQ'].isin(sgil_id_list)]
 sub_df_in.insert(loc=0,column='ID_GISAID',value= fasta_prefix + "Canada/Qc-" + sub_df_in['NO_LSPQ'] + "/2020" ,allow_duplicates=False ) 
-sub_df_in.insert(loc=1,column='LOCATION_GISAID',value= "North-America / Canada / " + sub_df_in['RSS_PATIENT'] ,allow_duplicates=False ) 
+#sub_df_in.insert(loc=1,column='LOCATION_GISAID',value= "North-America / Canada / " + sub_df_in['RSS_PATIENT'] ,allow_duplicates=False ) 
+sub_df_in.insert(loc=1,column='LOCATION_GISAID',value= "North-America / Canada / Quebec" ,allow_duplicates=False ) 
 sub_df_in.insert(loc=2,column='TRAVEL_GISAID',value= sub_df_in['VOYAGE_PAYS_1'] ,allow_duplicates=False ) 
 
 gisaid_metadata = sub_df_in.loc[:,('NO_LSPQ','ID_GISAID','DATE_PRELEV','AGE','SEX','LOCATION_GISAID','TRAVEL_GISAID','RES_LAB','CH','ADDR_CH')]
@@ -159,6 +160,7 @@ added_header = pd.DataFrame({'submitter':['Submitter'],'fn':['FASTA filename'],'
 
 
 gisaid_metadata = pd.concat([added_header,gisaid_metadata])
+
 
 gisaid_metadata.to_excel(metadata_out,index=False,sheet_name='Submissions')
 fasta_in_list = glob.glob(unpublished_path + "*.fasta")
