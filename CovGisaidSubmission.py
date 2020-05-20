@@ -21,6 +21,10 @@ sgil_id_list = []
 global gisaid_info
 gisaid_info = {}
 
+global rec_description
+rec_description = {}
+
+
 today = date.today()
 today = today.strftime("%Y%m%d")
 
@@ -49,20 +53,31 @@ metadata_out = os.path.join(today_submitted_seq_path,metadata_name)
 submitting_lab_addr = "20045, chemin Sainte-Marie, Sainte-Anne-de-Bellevue, QC, Canada"
 authors = "Sandrine Moreira, Ioannis Ragoussis, Guillaume Bourque, Jesse Shapiro, Mark Lathrop and Michel Roger on behalf of the CoVSeQ research group (http://covseq.ca/researchgroup)"
 
+fasta_prefix = 'hCoV-19/'
+
 
 def ConcatSeq(files_in,file_out):
-    os.system("cat " + files_in + " > " + file_out )
+    rec_list = []
+    
+    for fasta in glob.glob(files_in):
+        my_rec = SeqIO.read(fasta,'fasta')
+        my_rec.id = fasta_prefix + my_rec.id
+        desc = re.split('\s+',my_rec.description)[1]
+        my_rec.description = ''
+        rec_list.append(my_rec)
+        rec_description[my_rec.id] = desc
+    SeqIO.write(rec_list,file_out,'fasta')
 
 def MakeSeqIdList():
 
     for rec in SeqIO.parse(fasta_cat,'fasta'):
         try:
-            sgil_id = re.search(r'^Canada/Qc-(L\S+)/\d{4}',rec.id).group(1)
+            sgil_id = re.search(fasta_prefix + r'Canada/Qc-(L\S+)/\d{4}',rec.id).group(1)
             sgil_id_list.append(sgil_id)
             
             desc_dict = {}
             desc_dict['gisaid_id'] = rec.id
-            desc_dict['method'] = re.split('\s+',rec.description)[1]
+            desc_dict['method'] = rec_description[rec.id]
             
             gisaid_info[sgil_id] = desc_dict
 
@@ -88,7 +103,7 @@ MakeSeqIdList()
 
 df_in = pd.read_csv(metadata_in,delimiter="\t",index_col=False,encoding="UTF-8")
 sub_df_in = df_in[df_in['NO_LSPQ'].isin(sgil_id_list)]
-sub_df_in.insert(loc=0,column='ID_GISAID',value= "Canada/Qc-" + sub_df_in['NO_LSPQ'] + "/2020" ,allow_duplicates=False ) 
+sub_df_in.insert(loc=0,column='ID_GISAID',value= fasta_prefix + "Canada/Qc-" + sub_df_in['NO_LSPQ'] + "/2020" ,allow_duplicates=False ) 
 sub_df_in.insert(loc=1,column='LOCATION_GISAID',value= "North-America / Canada / " + sub_df_in['RSS_PATIENT'] ,allow_duplicates=False ) 
 sub_df_in.insert(loc=2,column='TRAVEL_GISAID',value= sub_df_in['VOYAGE_PAYS_1'] ,allow_duplicates=False ) 
 
