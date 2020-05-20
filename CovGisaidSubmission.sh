@@ -1,9 +1,8 @@
 #!/bin/bash
 
-echo "TESTING"
 
-unpublished_path="/data/Runs/SARS-CoV-2/GenomeCenterSeq/FinalRelease/TEST/FinalUnpublished/"
-submitted_path="/data/Runs/SARS-CoV-2/GenomeCenterSeq/FinalRelease/TEST/FinalSubmitted/"
+unpublished_path="/data/Runs/SARS-CoV-2/GenomeCenterSeq/FinalRelease/FinalUnpublished/"
+submitted_path="/data/Runs/SARS-CoV-2/GenomeCenterSeq/FinalRelease/FinalSubmitted/"
 
 slbio_user=$(whoami)
 ldap_user=$(echo ${slbio_user} | cut -d '@' -f 1)
@@ -29,5 +28,4 @@ else
         sudo mount -t cifs -o username=${ldap_user},password=$pw,vers=3.0 "//swsfi52p/partage" /mnt/Partage
 fi
 
-
-#python /data/Applications/GitScript/GisaidSubmission/CovGisaidSubmission.py --unpublished-path  ${unpublished_path} --submitted-path ${submitted_path}
+python /data/Applications/GitScript/GisaidSubmission/CovGisaidSubmission.py --unpublished-path  ${unpublished_path} --submitted-path ${submitted_path}
