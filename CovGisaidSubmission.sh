@@ -25,6 +25,7 @@ else
         echo -e "${yellow_message}INFO: " "/mnt/Partage/ not mounted. Try to mount now ..."
         echo -e "${white_message}"
         read pw < $PASS_FILE
+        sudo umount /mnt/Partage/
         sudo mount -t cifs -o username=${ldap_user},password=$pw,vers=3.0 "//swsfi52p/partage" /mnt/Partage
 fi
 
