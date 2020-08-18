@@ -29,4 +29,4 @@ else
         sudo mount -t cifs -o username=${ldap_user},password=$pw,vers=3.0 "//swsfi52p/partage" /mnt/Partage
 fi
 
-python /data/Applications/GitScript/GisaidSubmission/CovGisaidSubmission.py --unpublished-path  ${unpublished_path} --submitted-path ${submitted_path}
+python /data/Applications/GitScript/GisaidSubmission/CovGisaidSubmissionV2.py --unpublished-path  ${unpublished_path} --submitted-path ${submitted_path}
