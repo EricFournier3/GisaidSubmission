@@ -103,6 +103,7 @@ def MakeSeqIdList():
             print(e)
             print('Unable to parse ', str(rec.id))
 
+
 def from_dob_to_age(born):
     today = datetime.date.today()
     return today.year - born.year - ((today.month, today.day) < (born.month, born.day))
@@ -115,6 +116,15 @@ def GetQcDataframeFromDSPdb(id_list):
 ConcatSeq(unpublished_path + "*.fasta",fasta_cat)
 
 MakeSeqIdList()
+
+'''
+def Test(qc_list):
+    MySQLcovid19.SetConnection()
+    for spec_id in qc_list:
+        pd_df = MySQLcovid19Selector.GetMetadataAsPdDataFrame(MySQLcovid19.GetConnection(),[spec_id])
+        #print(spec_id)
+Test(qc_id_list)
+'''
 
 df_qc_from_dsp_db = GetQcDataframeFromDSPdb(qc_id_list)
 df_qc_from_dsp_db['covv_virus_name'] = 'hCoV-19/Canada/Qc-' +  df_qc_from_dsp_db['covv_virus_name'] + "/2020"

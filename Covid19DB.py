@@ -11,7 +11,7 @@ class MySQLcovid19:
     host = 'localhost'
     user = 'root'
     password = 'lspq2019'
-    database = 'TestCovid19v7'
+    database = 'TestCovid19_20200911'
     connection = None
 
     @classmethod
@@ -101,8 +101,12 @@ class MySQLcovid19Selector:
 
 
         df = pd.read_sql(sql,con=conn)
+        #print("DF SHAPE IS ", df.shape)
+        '''
+        if df.shape[0] == 0:
+            print("NO DATA FOR ",spec_list)
+        '''
         return df
-
 
 class Utils():
 
