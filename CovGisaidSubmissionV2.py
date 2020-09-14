@@ -33,6 +33,15 @@ today = today.strftime("%Y%m%d")
 
 fasta_prefix = 'hCoV-19/'
 
+published_seqid = []
+published_path = "/data/Runs/SARS-CoV-2/GenomeCenterSeq/FinalRelease/FinalPublished/"
+
+for published_fasta in glob.glob(published_path + "*/all_sequences.fasta"):
+    for rec in SeqIO.parse(published_fasta,'fasta'):
+        rec_id = re.search(r'^hCoV-19/Canada/Qc-(L\S+)/\d{4}$',rec.id).group(1)
+        published_seqid.append(rec_id)
+
+
 if not _debug:
     parser = argparse.ArgumentParser(description='Create files for GISAID submission')
     parser.add_argument('--unpublished-path','-u', required=True, help="path to final unpublished sequence")
@@ -91,7 +100,8 @@ def MakeSeqIdList():
         try:
             #TODO enlever le prefix L du regex
             qc_id = re.search(fasta_prefix + r'Canada/Qc-(L\S+)/\d{4}',rec.id).group(1)
-            qc_id_list.append(qc_id)
+            if qc_id not in published_seqid:
+                qc_id_list.append(qc_id)
             
             desc_dict = {}
             desc_dict['gisaid_id'] = rec.id
@@ -137,7 +147,7 @@ added_header = pd.DataFrame({'submitter':['Submitter'],'fn':['FASTA filename'],'
 
 
 df_qc_from_dsp_db = pd.concat([added_header,df_qc_from_dsp_db])
-
+print(df_qc_from_dsp_db.shape)
 metadata_out = os.path.join(today_submitted_seq_path,metadata_name)
 
 df_qc_from_dsp_db.to_excel(metadata_out,index=False,sheet_name='Submissions')
