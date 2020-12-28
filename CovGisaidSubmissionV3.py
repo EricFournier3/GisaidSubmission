@@ -9,6 +9,7 @@ import glob
 import shutil
 import datetime
 import logging
+from Covid19DB import MySQLcovid19,MySQLcovid19Selector
 
 
 """
@@ -16,14 +17,23 @@ import logging
  TODO
    - utiliser le metadata au lieu de se connected sur la bd
    - faire le mount dans ce script au lieu d utiliser le sh
+   - faire une fonction checkup pour verifier les id manquant dans le metadata
+
+
 """
 
 
 logging.basicConfig(level=logging.INFO)
 pd.set_option('display.max_columns', 50)
 
-global qc_id_list
-qc_id_list = []
+global tosubmit_id_list
+tosubmit_id_list = []
+
+global tosubmit_rec_list
+tosubmit_rec_list = []
+
+global tosubmit_rec_dict
+tosubmit_rec_dict = {}
 
 global gisaid_info
 gisaid_info = {}
@@ -45,6 +55,8 @@ published_path = "/data/PROJETS/COVID-19_Beluga/Gisaid/FinalPublished/"
 
 global tosubmit_path
 tosubmit_path = "/data/PROJETS/COVID-19_Beluga/Gisaid/ToSubmit/"
+
+global meta_out
 
 today = date.today()
 today = today.strftime("%Y%m%d")
@@ -91,14 +103,59 @@ for published_fasta in glob.glob(published_path + "release1/*/all_sequences.fast
 
 
 today_tosubmit_path = os.path.join(tosubmit_path,today)
-#print("today_tosubmit_path ",today_tosubmit_path)
+meta_out = os.path.join(today_tosubmit_path,today + "_ncov19_metadata.xls")
+seq_out = os.path.join(today_tosubmit_path,"all_sequences.fasta")
 
-fasta_cat = os.path.join(today_tosubmit_path,"all_sequences.fasta")
 
 try:
     os.mkdir(today_tosubmit_path)
 except:
     print(today_tosubmit_path + " already exist")
+
+def from_dob_to_age(born):
+    today = datetime.date.today()
+    return today.year - born.year - ((today.month, today.day) < (born.month, born.day))
+
+def GetMetadataDfFromCovBank(id_list):
+    MySQLcovid19.SetConnection()
+    pd_df = MySQLcovid19Selector.GetMetadataAsPdDataFrame(MySQLcovid19.GetConnection(),id_list)
+    return(pd_df)
+
+def BuildRecordsDictToSubmit():
+    for rec in SeqIO.parse(seq_in,'fasta'):
+        try:
+            parsed_header = re.search(r'(Canada/Qc-)(\S+)/(\d{4}) seq_method:(\S+)\|assemb_method:\S+\|snv_call_method:\S+ ',rec.description)
+            req_number = parsed_header.group(2)
+        
+            rec.id = fasta_prefix + parsed_header.group(1) + req_number + "/" + parsed_header.group(3)
+            rec.description = ""
+            seq_method = parsed_header.group(4)
+            tosubmit_rec_list.append(rec)
+            tosubmit_rec_dict[req_number] = {'gisaid_id':rec.id,'method':seq_method}
+        except Exception as e:
+            print(e)
+            print('Unable to parse ', str(rec.id))
+
+def GetVirusName(req_number):
+    return(tosubmit_rec_dict[req_number]['gisaid_id'])
+
+def GetSequencingMethod(req_number):
+    return(tosubmit_rec_dict[req_number]['method'])
+
+BuildRecordsDictToSubmit()
+metadata_df = GetMetadataDfFromCovBank(tosubmit_rec_dict.keys())
+
+metadata_df['covv_virus_name'] = metadata_df['covv_virus_name'].apply(GetVirusName)
+metadata_df.insert(loc=11,column='covv_patient_age',value=metadata_df['DTNAISS'].apply(lambda x: from_dob_to_age(x)))
+metadata_df.insert(loc=18,column='covv_seq_technology',value=metadata_df['covv_subm_sample_id'].apply(GetSequencingMethod))
+del metadata_df['DTNAISS']
+
+added_header = pd.DataFrame({'submitter':['Submitter'],'fn':['FASTA filename'],'covv_virus_name':['Virus name'],'covv_type':['Type'],'covv_passage':['Passage details/history'],'covv_collection_date':['Collection date'],'covv_location':['Location'],'covv_add_location':['Additionnal location information'],'covv_host':['Host'],'covv_add_host_info':['Additional host info'], 'covv_gender':['Gender'],'covv_patient_age':['Patient age'],'covv_patient_status':['Patient status'],'covv_specimen':['Specimen source'],'covv_outbreak':['Outbreak'],'covv_last_vaccinated':['Last vaccinated'],'covv_treatment':['Treatment'],'covv_seq_technology':['Sequencing technology'],'covv_assembly_method':['Assembly method'],'covv_coverage':['Coverage'],'covv_orig_lab':['Originating lab'],'covv_orig_lab_addr':['Address'],'covv_provider_sample_id':['Sample ID given by the sample provider'],'covv_subm_lab':['Submitting lab'],'covv_subm_lab_addr':['Address'],'covv_subm_sample_id':['Sample ID given by the submitting laboratory'],'covv_authors':['Authors']})
+
+metadata_df = pd.concat([added_header,metadata_df])
+metadata_df.to_excel(meta_out,index=False,sheet_name='Submission')
+SeqIO.write(tosubmit_rec_list,seq_out,'fasta')
+print(metadata_df)
 exit(1)
 #************************************************************************************
 if not _debug:
