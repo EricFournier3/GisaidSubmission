@@ -11,7 +11,7 @@ class MySQLcovid19:
     host = 'localhost'
     user = 'root'
     password = 'lspq2019'
-    database = 'TestCovid19_20200911'
+    database = 'CovBank20201222'
     connection = None
 
     @classmethod
@@ -66,14 +66,14 @@ class MySQLcovid19Selector:
         COVV_VIRUS_NAME = "{0}.GENOME_QUEBEC_REQUETE as covv_virus_name".format(Prelevements_alias) #decoration ajouter dans CovGisaidSubmissionV2.py
         COVV_TYPE = "\'betacoronavirus\' as covv_type" 
         COVV_PASSAGE = "\'Original\' as covv_passage"
-        COVV_COLLECTION_DATE = "{0}.DATE_PRELEV_HOPITAL as covv_collection_date".format(Prelevements_alias)
+        COVV_COLLECTION_DATE = "{0}.DATE_PRELEV as covv_collection_date".format(Prelevements_alias)
         COVV_LOCATION = "\'North-America / Canada / Quebec\' as covv_location"
         COVV_ADD_LOCATION = "\' \' as covv_add_location"
         COVV_HOST = "\'Human\' as covv_host" 
         COVV_ADD_HOST_INFO = "\' \' as covv_add_host_info"
-        COVV_GENDER = "{0}.SEXEINFO as covv_gender".format(Patients_alias)
+        COVV_GENDER = "{0}.SEXE as covv_gender".format(Patients_alias)
 
-        DTNAISSINFO = "{0}.DTNAISSINFO".format(Patients_alias) # va permettre de determiner l age
+        DTNAISSINFO = "{0}.DTNAISS".format(Patients_alias) # va permettre de determiner l age
 
         COVV_PATIENT_STATUS = "\'unknown\' as covv_patient_status"
         COVV_SPECIMEN = "\' \' as covv_specimen"
