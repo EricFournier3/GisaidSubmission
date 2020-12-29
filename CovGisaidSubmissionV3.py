@@ -117,9 +117,8 @@ def MountPartageCovid19():
     UmountPartageCovid19()
     os.system("sudo mount -t cifs -o username=" + user + ",vers=3.0 " + partage_covid19_path + " " + mnt_partage_covid19_path)
 
-#UmountPartageCovid19()
-#MountPartageCovid19()
-
+UmountPartageCovid19()
+MountPartageCovid19()
 
 def from_dob_to_age(born):
     today = datetime.date.today()
@@ -156,7 +155,7 @@ metadata_df = GetMetadataDfFromCovBank(tosubmit_rec_dict.keys())
 
 CheckMetadata(tosubmit_rec_dict.keys(),list(metadata_df['covv_virus_name']))
 
-exit(1)
+#exit(1)
 
 metadata_df['covv_virus_name'] = metadata_df['covv_virus_name'].apply(GetVirusName)
 metadata_df.insert(loc=11,column='covv_patient_age',value=metadata_df['DTNAISS'].apply(lambda x: from_dob_to_age(x)))
@@ -177,6 +176,6 @@ except:
 finally:
     os.system("sudo cp {0} {1} {2}".format(seq_out,meta_out,today_mnt_partage_covid19_path))
 
-#UmountPartageCovid19()
+UmountPartageCovid19()
 
 exit(0)
