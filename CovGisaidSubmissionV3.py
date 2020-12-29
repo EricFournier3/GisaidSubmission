@@ -104,10 +104,14 @@ except:
 def CheckMetadata(ids_in_fasta,ids_in_metadata):
     ids_in_fasta = set(ids_in_fasta)
     ids_in_metadata = set(ids_in_metadata)
-    print(ids_in_fasta)
-    print(ids_in_metadata)
+    #print(ids_in_fasta)
+    #print(ids_in_metadata)
+    missing = ids_in_fasta - ids_in_metadata
+    if len(missing) > 0:
+        logging.warning("The following ids are missing from metadata : " + str(missing))
+        return(True)
+    return(False)
     
-
 def UmountPartageCovid19():
     logging.info("Try to unmount Partage Covid19")
     os.system("sudo umount " + mnt_partage_covid19_path)
@@ -153,9 +157,9 @@ def GetSequencingMethod(req_number):
 BuildRecordsDictToSubmit()
 metadata_df = GetMetadataDfFromCovBank(tosubmit_rec_dict.keys())
 
-CheckMetadata(tosubmit_rec_dict.keys(),list(metadata_df['covv_virus_name']))
-
-#exit(1)
+if CheckMetadata(tosubmit_rec_dict.keys(),list(metadata_df['covv_virus_name'])):
+    UmountPartageCovid19()
+    exit(1)
 
 metadata_df['covv_virus_name'] = metadata_df['covv_virus_name'].apply(GetVirusName)
 metadata_df.insert(loc=11,column='covv_patient_age',value=metadata_df['DTNAISS'].apply(lambda x: from_dob_to_age(x)))
